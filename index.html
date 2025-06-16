@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub图片画廊 | 密码保护</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a3a7c, #3a4a8c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        /* 密码保护层 */
+        .password-protection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .password-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateY(0);
+            transition: transform 0.5s ease;
+        }
+        
+        .password-box h2 {
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .password-hint {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .password-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .password-input {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .password-input:focus {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+        }
+        
+        .password-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .submit-btn {
+            padding: 15px;
+            border: none;
+            background: linear-gradient(to right, #ff6b6b, #ff9966);
+            color: white;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .error-msg {
+            color: #ff6b6b;
+            margin-top: 10px;
+            font-size: 1rem;
+            height: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .error-msg.show {
+            opacity: 1;
+        }
+        
+        .lock-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 画廊内容 - 默认隐藏 */
+        .gallery-content {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease 0.3s;
+        }
+        
+        .gallery-content.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 头部样式 */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 15px auto 0;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .github-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 600px;
+            font-size: 0.95rem;
+        }
+        
+        /* 控制面板样式 */
+        .controls {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 1s ease;
+        }
+        
+        .search-box {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto 25px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px 0 0 50px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .search-box button {
+            padding: 15px 25px;
+            border: none;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 0 50px 50px 0;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background 0.3s;
+        }
+        
+        .search-box button:hover {
+            background: #ff5252;
+        }
+        
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .category-btn {
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .category-btn:hover, .category-btn.active {
+            background: #4ecdc4;
+            border-color: #4ecdc4;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* 图片网格样式 */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+            animation: fadeIn 1.5s ease;
+        }
+        
+        .gallery-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            height: 280px;
+            cursor: pointer;
+            transition: transform 0.4s, box-shadow 0.4s;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            z-index: 2;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .item-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 20px;
+            transform: translateY(40px);
+            opacity: 0;
+            transition: all 0.4s;
+        }
+        
+        .gallery-item:hover .item-info {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .item-info h3 {
+            margin-bottom: 8px;
+            font-size: 1.3rem;
+        }
+        
+        .item-info .category {
+            display: inline-block;
+            background: #4ecdc4;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        
+        /* 灯箱样式 */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            text-align: center;
+        }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            font-size: 2.5rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s;
+            background: rgba(0,0,0,0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .lightbox-close:hover {
+            transform: rotate(90deg);
+            background: rgba(255,0,0,0.7);
+        }
+        
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            transform: translateY(-50%);
+        }
+        
+        .lightbox-nav button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .lightbox-nav button:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .image-info {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            max-width: 700px;
+            margin: 20px auto 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 10px;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-box input {
+                border-radius: 50px;
+                margin-bottom: 15px;
+            }
+            
+            .search-box button {
+                border-radius: 50px;
+                padding: 15px;
+            }
+            
+            .password-box {
+                padding: 30px 20px;
+            }
+            
+            .password-box h2 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .categories {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .category-btn {
+                width: 80%;
+            }
+            
+            .github-info {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 密码保护层 -->
+    <div class="password-protection" id="password-protection">
+        <div class="password-box">
+            <i class="fas fa-lock lock-icon"></i>
+            <h2>访问受限</h2>
+            <div class="password-hint">
+                <i class="fas fa-question-circle"></i> 密码提示：我的名字是什么？
+            </div>
+            <form class="password-form" id="password-form">
+                <input type="password" class="password-input" id="password-input" placeholder="请输入密码..." required>
+                <button type="submit" class="submit-btn">解锁内容</button>
+                <div class="error-msg" id="error-msg">密码错误，请重试</div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 画廊内容 -->
+    <div class="container gallery-content" id="gallery-content">
+        <header>
+            <h1><i class="fab fa-github"></i> GitHub图片画廊</h1>
+            <p class="subtitle">展示您GitHub仓库中的图片，支持自定义分类、搜索和灯箱查看功能</p>
+            
+            <div class="github-info">
+                <p><i class="fas fa-info-circle"></i> 此页面使用GitHub仓库中的图片。图片路径格式：<code>images/文件夹/图片文件名.jpg</code></p>
+            </div>
+        </header>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="搜索图片标题或描述...">
+                <button id="search-btn"><i class="fas fa-search"></i> 搜索</button>
+            </div>
+            
+            <div class="categories">
+                <button class="category-btn active" data-category="all">全部图片</button>
+                <button class="category-btn" data-category="nature">自然风光</button>
+                <button class="category-btn" data-category="city">城市建筑</button>
+                <button class="category-btn" data-category="animals">动物世界</button>
+                <button class="category-btn" data-category="travel">旅行摄影</button>
+            </div>
+        </div>
+        
+        <div class="gallery" id="image-gallery">
+            <!-- 图片将通过JavaScript动态生成 -->
+        </div>
+    </div>
+    
+    <!-- 灯箱 -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <span class="lightbox-close" id="lightbox-close">&times;</span>
+            <img id="lightbox-img" src="" alt="">
+            <div class="image-info" id="image-info"></div>
+            <div class="lightbox-nav">
+                <button id="prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <button id="next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2023 GitHub图片画廊 | 使用HTML、CSS和JavaScript创建 | 图片存储于GitHub仓库</p>
+    </footer>
+
+    <script>
+        // 密码验证功能
+        const passwordProtection = document.getElementById('password-protection');
+        const galleryContent = document.getElementById('gallery-content');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const errorMsg = document.getElementById('error-msg');
+        
+        // 正确密码
+        const correctPassword = "小明";
+        
+        // 表单提交事件
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const enteredPassword = passwordInput.value.trim();
+            
+            if (enteredPassword === correctPassword) {
+                // 密码正确，显示内容
+                passwordProtection.style.opacity = '0';
+                passwordProtection.style.pointerEvents = 'none';
+                
+                setTimeout(() => {
+                    galleryContent.classList.add('show');
+                    // 初始化画廊
+                    initGallery();
+                }, 500);
+            } else {
+                // 密码错误
+                passwordInput.value = '';
+                passwordInput.focus();
+                errorMsg.classList.add('show');
+                
+                // 添加抖动动画
+                passwordForm.classList.add('shake');
+                setTimeout(() => {
+                    passwordForm.classList.remove('shake');
+                }, 500);
+            }
+        });
+        
+        // 初始化画廊
+        function initGallery() {
+            // 自定义图片数据 - 使用GitHub仓库中的图片路径
+            const images = [
+                { 
+                    id: 1, 
+                    title: "山脉日出", 
+                    category: "nature", 
+                    desc: "清晨的第一缕阳光洒落在雄伟的山脉上，金色光芒照亮了整个山谷。",
+                    fileName: "images/nature/mountain-sunrise.jpg"
+                },
+                { 
+                    id: 2, 
+                    title: "城市夜景", 
+                    category: "city", 
+                    desc: "现代化大都市的壮观夜景，灯火辉煌的天际线令人叹为观止。",
+                    fileName: "images/city/night-skyline.jpg"
+                },
+                { 
+                    id: 3, 
+                    title: "非洲狮王", 
+                    category: "animals", 
+                    desc: "非洲草原上的狮子王者，威严地巡视着自己的领地。",
+                    fileName: "images/animals/lion-king.jpg"
+                },
+                { 
+                    id: 4, 
+                    title: "海滩日落", 
+                    category: "nature", 
+                    desc: "热带海滩上令人惊叹的日落景色，天空被染成橙红色。",
+                    fileName: "images/nature/beach-sunset.jpg"
+                },
+                { 
+                    id: 5, 
+                    title: "东京塔夜景", 
+                    category: "city", 
+                    desc: "夜晚灯光璀璨的东京塔，是日本首都的标志性建筑。",
+                    fileName: "images/city/tokyo-tower.jpg"
+                },
+                { 
+                    id: 6, 
+                    title: "大熊猫", 
+                    category: "animals", 
+                    desc: "可爱的大熊猫正在享用新鲜的竹子，憨态可掬的样子惹人喜爱。",
+                    fileName: "images/animals/panda-eating.jpg"
+                },
+                { 
+                    id: 7, 
+                    title: "森林小径", 
+                    category: "nature", 
+                    desc: "晨雾中的神秘森林小径，阳光透过树叶洒下斑驳光影。",
+                    fileName: "images/nature/forest-path.jpg"
+                },
+                { 
+                    id: 8, 
+                    title: "巴黎埃菲尔铁塔", 
+                    category: "city", 
+                    desc: "浪漫之都巴黎的标志性建筑，在蓝天白云下格外壮观。",
+                    fileName: "images/city/eiffel-tower.jpg"
+                },
+                { 
+                    id: 9, 
+                    title: "孔雀开屏", 
+                    category: "animals", 
+                    desc: "孔雀展示其华丽的羽毛，色彩斑斓的羽毛形成美丽的扇状。",
+                    fileName: "images/animals/peacock.jpg"
+                },
+                { 
+                    id: 10, 
+                    title: "威尼斯水城", 
+                    category: "travel", 
+                    desc: "意大利威尼斯水城的经典景观，古老的建筑与运河相映成趣。",
+                    fileName: "images/travel/venice-canals.jpg"
+                },
+                { 
+                    id: 11, 
+                    title: "北极光", 
+                    category: "nature", 
+                    desc: "挪威上空的绚丽北极光，绿色光带在夜空中舞动。",
+                    fileName: "images/nature/northern-lights.jpg"
+                },
+                { 
+                    id: 12, 
+                    title: "沙漠星空", 
+                    category: "travel", 
+                    desc: "撒哈拉沙漠的星空，银河清晰可见，令人震撼的宇宙美景。",
+                    fileName: "images/travel/desert-stars.jpg"
+                }
+            ];
+
+            // 动态生成图片
+            const gallery = document.getElementById('image-gallery');
+            
+            images.forEach(image => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.dataset.category = image.category;
+                item.dataset.id = image.id;
+                
+                // 使用GitHub仓库中的图片路径
+                const imgUrl = image.fileName;
+                
+                item.innerHTML = `
+                    <img src="${imgUrl}" alt="${image.title}" loading="lazy">
+                    <div class="item-info">
+                        <h3>${image.title}</h3>
+                        <span class="category">${getCategoryName(image.category)}</span>
+                        <p>${image.desc.substring(0, 60)}...</p>
+                    </div>
+                `;
+                
+                gallery.appendChild(item);
+                
+                // 添加点击事件
+                item.addEventListener('click', () => {
+                    openLightbox(image.id);
+                });
+            });
+
+            // 分类名称映射
+            function getCategoryName(category) {
+                const names = {
+                    'nature': '自然风光',
+                    'city': '城市建筑',
+                    'animals': '动物世界',
+                    'food': '美食佳肴',
+                    'travel': '旅行摄影'
+                };
+                return names[category] || category;
+            }
+
+            // 分类按钮功能
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // 更新按钮状态
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    const category = button.dataset.category;
+                    filterImages(category);
+                });
+            });
+
+            // 图片过滤函数
+            function filterImages(category) {
+                const items = document.querySelectorAll('.gallery-item');
+                
+                items.forEach(item => {
+                    if (category === 'all' || item.dataset.category === category) {
+                        item.style.display = 'block';
+                        setTimeout(() => {
+                            item.style.opacity = 1;
+                        }, 50);
+                    } else {
+                        item.style.opacity = 0;
+                        setTimeout(() => {
+                            item.style.display = 'none';
+                        }, 300);
+                    }
+                });
+            }
+
+            // 搜索功能
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+            
+            function performSearch() {
+                const term = searchInput.value.toLowerCase().trim();
+                if (!term) {
+                    filterImages('all');
+                    categoryButtons[0].classList.add('active');
+                    return;
+                }
+                
+                const items = document.querySelectorAll('.gallery-item');
+                let found = false;
+                
+                // 重置所有按钮状态
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-category="all"]').classList.add('active');
+                
+                items.forEach(item => {
+                    const title = item.querySelector('h3').textContent.toLowerCase();
+                    const desc = item.querySelector('p').textContent.toLowerCase();
+                    
+                    if (title.includes(term) || desc.includes(term)) {
+                        item.style.display = 'block';
+                        setTimeout(() => {
+                            item.style.opacity = 1;
+                        }, 50);
+                        found = true;
+                    } else {
+                        item.style.opacity = 0;
+                        setTimeout(() => {
+                            item.style.display = 'none';
+                        }, 300);
+                    }
+                });
+                
+                // 如果没有结果，显示提示
+                if (!found) {
+                    gallery.innerHTML = `<div class="no-results" style="grid-column:1/-1;text-align:center;padding:50px;opacity:0;animation:fadeIn 1s forwards">
+                        <h3><i class="fas fa-search"></i> 未找到匹配的图片</h3>
+                        <p>请尝试使用其他关键词搜索</p>
+                    </div>`;
+                }
+            }
+
+            // 灯箱功能
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxClose = document.getElementById('lightbox-close');
+            const imageInfo = document.getElementById('image-info');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            let currentImageId = 0;
+            
+            function openLightbox(id) {
+                currentImageId = parseInt(id);
+                const image = images.find(img => img.id === currentImageId);
+                
+                if (image) {
+                    // 使用GitHub仓库中的图片路径
+                    lightboxImg.src = image.fileName;
+                    lightboxImg.alt = image.title;
+                    
+                    imageInfo.innerHTML = `
+                        <h3>${image.title}</h3>
+                        <p>${image.desc}</p>
+                        <p><span class="category">${getCategoryName(image.category)}</span></p>
+                        <p><small>图片路径: ${image.fileName}</small></p>
+                    `;
+                    
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
+            function navigateLightbox(direction) {
+                let newIndex = images.findIndex(img => img.id === currentImageId);
+                
+                if (direction === 'prev') {
+                    newIndex = (newIndex - 1 + images.length) % images.length;
+                } else {
+                    newIndex = (newIndex + 1) % images.length;
+                }
+                
+                openLightbox(images[newIndex].id);
+            }
+            
+            // 事件监听
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            
+            prevBtn.addEventListener('click', () => navigateLightbox('prev'));
+            nextBtn.addEventListener('click', () => navigateLightbox('next'));
+            
+            // 键盘导航
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('active')) return;
+                
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') navigateLightbox('prev');
+                if (e.key === 'ArrowRight') navigateLightbox('next');
+            });
+
+            // 初始显示所有图片
+            filterImages('all');
+        }
+    </script>
+</body>
+</html>
