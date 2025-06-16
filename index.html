@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YX的图像成果</title>
+    <title>GitHub图片画廊 | 密码保护</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -582,7 +582,7 @@
     </div>
     
     <footer>
-        <p>© 2025 GitHub图片画廊 | 使用HTML、CSS和JavaScript创建 | 图片存储于GitHub仓库</p>
+        <p>© 2023 GitHub图片画廊 | 使用HTML、CSS和JavaScript创建 | 图片存储于GitHub仓库</p>
     </footer>
 
     <script>
@@ -720,20 +720,6 @@
                     category: "ringCircle", 
                     desc: "复杂背景干扰",
                     fileName: "ringCircle2.png"
-                },
-                { 
-                    id: 14, 
-                    title: "精确性", 
-                    category: "circleArray", 
-                    desc: "圆阵识别",
-                    fileName: "circleArray1.png"
-                },
-                { 
-                    id: 15, 
-                    title: "性能优化", 
-                    category: "rate", 
-                    desc: "识别速度显著提升",
-                    fileName: "rate1.png"
                 },
             ];
 
@@ -883,7 +869,8 @@
                         <h3>${image.title}</h3>
                         <p>${image.desc}</p>
                         <p><span class="category">${getCategoryName(image.category)}</span></p>
-                        ;
+                        <p><small>图片路径: ${image.fileName}</small></p>
+                    `;
                     
                     lightbox.classList.add('active');
                     document.body.style.overflow = 'hidden';
