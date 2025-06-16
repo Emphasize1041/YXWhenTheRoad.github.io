@@ -556,9 +556,9 @@
             
             <div class="categories">
                 <button class="category-btn active" data-category="all">全部图片</button>
-                <button class="category-btn" data-category="nature">自然风光</button>
-                <button class="category-btn" data-category="city">城市建筑</button>
-                <button class="category-btn" data-category="animals">动物世界</button>
+                <button class="category-btn" data-category="circle">圆形mark</button>
+                <button class="category-btn" data-category="ringCircle">圆环阵mark</button>
+                <button class="category-btn" data-category="circleArray">圆阵mark</button>
                 <button class="category-btn" data-category="travel">旅行摄影</button>
             </div>
         </div>
@@ -632,88 +632,95 @@
             const images = [
                 { 
                     id: 1, 
-                    title: "山脉日出", 
-                    category: "nature", 
-                    desc: "清晨的第一缕阳光洒落在雄伟的山脉上，金色光芒照亮了整个山谷。",
-                    fileName: "images/nature/mountain-sunrise.jpg"
+                    title: "高鲁棒性", 
+                    category: "circle", 
+                    desc: "带有严重划痕mark的准确识别",
+                    fileName: "circle1.png"
                 },
                 { 
                     id: 2, 
-                    title: "城市夜景", 
-                    category: "city", 
-                    desc: "现代化大都市的壮观夜景，灯火辉煌的天际线令人叹为观止。",
-                    fileName: "images/city/night-skyline.jpg"
+                    title: "高鲁棒性", 
+                    category: "circle", 
+                    desc: "低对比度mark的准确识别",
+                    fileName: "circle2.png"
                 },
                 { 
                     id: 3, 
-                    title: "非洲狮王", 
-                    category: "animals", 
-                    desc: "非洲草原上的狮子王者，威严地巡视着自己的领地。",
-                    fileName: "images/animals/lion-king.jpg"
+                    title: "高鲁棒性", 
+                    category: "circle", 
+                    desc: "低对比度mark的准确识别",
+                    fileName: "circle3.jpg"
                 },
                 { 
                     id: 4, 
-                    title: "海滩日落", 
-                    category: "nature", 
-                    desc: "热带海滩上令人惊叹的日落景色，天空被染成橙红色。",
-                    fileName: "images/nature/beach-sunset.jpg"
+                    title: "高鲁棒性", 
+                    category: "circle", 
+                    desc: "背景干扰的准确识别",
+                    fileName: "circle4.png"
                 },
                 { 
                     id: 5, 
-                    title: "东京塔夜景", 
-                    category: "city", 
-                    desc: "夜晚灯光璀璨的东京塔，是日本首都的标志性建筑。",
-                    fileName: "images/city/tokyo-tower.jpg"
+                    title: "高鲁棒性", 
+                    category: "circle", 
+                    desc: "带有严重划痕mark的准确识别",
+                    fileName: "circle5.png"
                 },
                 { 
                     id: 6, 
-                    title: "大熊猫", 
-                    category: "animals", 
-                    desc: "可爱的大熊猫正在享用新鲜的竹子，憨态可掬的样子惹人喜爱。",
-                    fileName: "images/animals/panda-eating.jpg"
+                    title: "精确性", 
+                    category: "circle", 
+                    desc: "外圆的准确识别",
+                    fileName: "circle6.png"
                 },
                 { 
                     id: 7, 
-                    title: "森林小径", 
-                    category: "nature", 
-                    desc: "晨雾中的神秘森林小径，阳光透过树叶洒下斑驳光影。",
-                    fileName: "images/nature/forest-path.jpg"
+                    title: "精确性", 
+                    category: "circle", 
+                    desc: "中圆的准确识别",
+                    fileName: "circle7.png"
                 },
                 { 
                     id: 8, 
-                    title: "巴黎埃菲尔铁塔", 
-                    category: "city", 
-                    desc: "浪漫之都巴黎的标志性建筑，在蓝天白云下格外壮观。",
-                    fileName: "images/city/eiffel-tower.jpg"
+                    title: "精确性", 
+                    category: "circle", 
+                    desc: "内圆的准确识别",
+                    fileName: "circle8.png"
                 },
                 { 
                     id: 9, 
-                    title: "孔雀开屏", 
-                    category: "animals", 
-                    desc: "孔雀展示其华丽的羽毛，色彩斑斓的羽毛形成美丽的扇状。",
-                    fileName: "images/animals/peacock.jpg"
+                    title: "高鲁棒性", 
+                    category: "circle", 
+                    desc: "低对比度mark的准确识别",
+                    fileName: "circle9.jpg"
                 },
                 { 
                     id: 10, 
-                    title: "威尼斯水城", 
-                    category: "travel", 
-                    desc: "意大利威尼斯水城的经典景观，古老的建筑与运河相映成趣。",
-                    fileName: "images/travel/venice-canals.jpg"
+                    title: "高鲁棒性", 
+                    category: "circle", 
+                    desc: "超低对比度mark的准确识别",
+                    fileName: "circle10.png"
                 },
                 { 
                     id: 11, 
-                    title: "北极光", 
-                    category: "nature", 
-                    desc: "挪威上空的绚丽北极光，绿色光带在夜空中舞动。",
-                    fileName: "images/nature/northern-lights.jpg"
+                    title: "高鲁棒性", 
+                    category: "circle", 
+                    desc: "图像质量较差",
+                    fileName: "circle11.jpg"
                 },
                 { 
                     id: 12, 
-                    title: "沙漠星空", 
-                    category: "travel", 
-                    desc: "撒哈拉沙漠的星空，银河清晰可见，令人震撼的宇宙美景。",
-                    fileName: "images/travel/desert-stars.jpg"
-                }
+                    title: "高鲁棒性", 
+                    category: "ringCircle1", 
+                    desc: "图像质量较差",
+                    fileName: "ringCircle1.png"
+                },
+                { 
+                    id: 13, 
+                    title: "高鲁棒性", 
+                    category: "ringCircle1", 
+                    desc: "复杂背景干扰",
+                    fileName: "ringCircle2.png"
+                },
             ];
 
             // 动态生成图片
@@ -748,10 +755,9 @@
             // 分类名称映射
             function getCategoryName(category) {
                 const names = {
-                    'nature': '自然风光',
-                    'city': '城市建筑',
-                    'animals': '动物世界',
-                    'food': '美食佳肴',
+                    'circle': '圆形mark',
+                    'ringCircle': '圆环阵mark',
+                    'circleArray': '圆阵mark',
                     'travel': '旅行摄影'
                 };
                 return names[category] || category;
